@@ -11,4 +11,4 @@ openstackutil/logger/__init__.py
 openstackutil/logger/glance_logger.py
 openstackutil/logger/keystone_logger.py
 openstackutil/logger/nova_logger.py
-openstackutil/logger/quantum.py
+openstackutil/logger/quantum_logger.py

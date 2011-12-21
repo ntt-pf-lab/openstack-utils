@@ -17,16 +17,15 @@
 
 
 """Utility that logs each API request and response details"""
+import logging
 import time
 import webob.dec
 
-from nova import flags
-from nova import log as logging
-from nova import wsgi
+from quantum.common import flags
+from quantum.common import wsgi
 
 
 FLAGS = flags.FLAGS
-
 flags.DEFINE_integer('max_response_len', -1,
                      'maximum length of the API response body to include in '\
                      'the log (-1 means log complete value)')
@@ -40,11 +39,17 @@ class DebugLogger(wsgi.Middleware):
 
     """
 
+    @classmethod
+    def factory(cls, global_config, **local_config):
+        def _factory(app):
+            return cls(app, **local_config)
+        return _factory
+
     def __init__(self, application, **global_config):
         super(DebugLogger, self).__init__(application)
-        self.LOG = logging.getLogger('nova.debug_logger')
+        self.LOG = logging.getLogger('quantum.common.debug_logger')
 
-    @webob.dec.wsgify(RequestClass=wsgi.Request)
+    @webob.dec.wsgify
     def __call__(self, req):
         if len(req.body):
             body = req.body
@@ -59,8 +64,10 @@ class DebugLogger(wsgi.Middleware):
 
         #set the request_id in cookie
         request_id = 'NA'
-        if req.environ.get('nova.context', None):
-            request_id = req.environ['nova.context'].request_id
+        if req.environ.get('context', None) and \
+           hasattr(req.environ['context'], request_id):
+            request_id = req.environ['context'].request_id
+
         resp.set_cookie('request_id', request_id)
 
         response_str = resp.body
