@@ -8,6 +8,7 @@ OpenStackUtil.egg-info/top_level.txt
 OpenStackUtil.egg-info/zip-safe
 openstackutil/__init__.py
 openstackutil/logger/__init__.py
-openstackutil/logger/glance.py
-openstackutil/logger/nova.py
+openstackutil/logger/glance_logger.py
+openstackutil/logger/keystone_logger.py
+openstackutil/logger/nova_logger.py
 openstackutil/logger/quantum.py

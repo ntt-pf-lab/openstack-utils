@@ -1,6 +1,6 @@
 Metadata-Version: 1.0
 Name: OpenStackUtil
-Version: 0.0.1dev
+Version: 0.0.2dev
 Summary: Utilities Script for OpenStack
 Home-page: https://github.com/ntt-pf-lab/openstack-api-logging
 Author: Nachi Ueno
