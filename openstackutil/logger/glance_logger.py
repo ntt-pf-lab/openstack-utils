@@ -55,6 +55,10 @@ class DebugLogger(wsgi.Middleware):
             body = req.body
         else:
             body = '-'
+
+        if self.max_response_len != -1:
+            body = body[0:self.max_response_len]
+
         input_params = "METHOD: %s URL: %s BODY: '%s'" % (req.method,
                                                         req.url,
                                                         body)
