@@ -51,17 +51,14 @@ class DebugLogger(wsgi.Middleware):
 
     @webob.dec.wsgify
     def __call__(self, req):
-        if len(req.body):
-            body = req.body
+        if req.method in ('POST', 'PUT') and self.max_response_len != -1:
+            body = req.body_file.read(self.max_response_len)
         else:
+            body = req.body
+
+        if body == '':
             body = '-'
 
-        if self.max_response_len != -1:
-            body = body[0:self.max_response_len]
-
-        input_params = "METHOD: %s URL: %s BODY: '%s'" % (req.method,
-                                                        req.url,
-                                                        body)
         start_time = time.time()
         resp = req.get_response(self.application)
         end_time = time.time()
@@ -74,15 +71,23 @@ class DebugLogger(wsgi.Middleware):
 
         resp.set_cookie('request_id', request_id)
 
-        response_str = resp.body
         if self.max_response_len != -1:
-            response_str = response_str[0:self.max_response_len]
-
-        log_str = "REQUEST ID: %s TIME: %.3f %s RESPONSE STATUS: '%s' "\
-                    "RESPONSE: '%s'" % \
+            response_str = ''
+            #TODO: uncomment after fixing the file handle close issue.
+            #for part in resp.app_iter:
+            #    response_str += part[0:(self.max_response_len -
+            #                         len(response_str))]
+            #    if len(response_str) == self.max_response_len:
+            #        break
+        else:
+            response_str = resp.body
+        log_str = "REQUEST ID: %s TIME: %.3f METHOD: %s URL: %s BODY: '%s' "\
+                    "RESPONSE STATUS: '%s' RESPONSE: '%s'" % \
                   (request_id,
                    end_time - start_time,
-                   input_params,
+                   req.method,
+                   req.url,
+                   body,
                    resp.status,
                    response_str)
 
