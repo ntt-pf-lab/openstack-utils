@@ -51,8 +51,12 @@ class DebugLogger(wsgi.Middleware):
 
     @webob.dec.wsgify
     def __call__(self, req):
-        if req.method in ('POST', 'PUT') and self.max_response_len != -1:
-            body = req.body_file.read(self.max_response_len)
+        if self.max_response_len != -1:
+            if req.method in ('POST', 'PUT') and \
+               req.content_type == 'application/octet-stream':
+                body = ''
+            else:
+                body = req.body[:self.max_response_len]
         else:
             body = req.body
 
@@ -72,13 +76,10 @@ class DebugLogger(wsgi.Middleware):
         resp.set_cookie('request_id', request_id)
 
         if self.max_response_len != -1:
-            response_str = ''
-            #TODO: uncomment after fixing the file handle close issue.
-            #for part in resp.app_iter:
-            #    response_str += part[0:(self.max_response_len -
-            #                         len(response_str))]
-            #    if len(response_str) == self.max_response_len:
-            #        break
+            if resp.headers['Content-Type'] == 'application/octet-stream':
+                response_str = ''
+            else:
+                response_str = resp.body[:self.max_response_len]
         else:
             response_str = resp.body
         log_str = "REQUEST ID: %s TIME: %.3f METHOD: %s URL: %s BODY: '%s' "\
