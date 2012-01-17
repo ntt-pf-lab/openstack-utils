@@ -54,21 +54,18 @@ class DebugLogger(wsgi.Middleware):
         if self.max_response_len != -1:
             if req.method in ('POST', 'PUT') and \
                req.content_type == 'application/octet-stream':
-                body = ''
+                body = 'Octet-stream : request body is ignored during logging'
             else:
                 body = req.body[:self.max_response_len]
         else:
             body = req.body
-
-        if body == '':
-            body = '-'
 
         start_time = time.time()
         resp = req.get_response(self.application)
         end_time = time.time()
 
         #set the request_id in cookie
-        request_id = 'NA'
+        request_id = None
         if req.environ.get('context', None) and \
            hasattr(req.environ['context'], request_id):
             request_id = req.environ['context'].request_id
@@ -77,7 +74,8 @@ class DebugLogger(wsgi.Middleware):
 
         if self.max_response_len != -1:
             if resp.headers['Content-Type'] == 'application/octet-stream':
-                response_str = ''
+                response_str = 'Octet-stream : response body is ignored '\
+                                'during logging'
             else:
                 response_str = resp.body[:self.max_response_len]
         else:
